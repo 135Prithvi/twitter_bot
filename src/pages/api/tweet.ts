@@ -6,7 +6,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   await client.v2.tweet(
-    `${generatePrompt} sports simulations: Users can participate in virtual sports simulations that provide a full-body workout, such as boxing, ${generatePrompt }.`
+    `${generatePrompt} provide a full-body workout, such as boxing, ${generatePrompt }.`
   );
 
   res.status(200).json({ message: " succesfully tweeted" });
