@@ -1,16 +1,17 @@
 import { TwitterApi } from "twitter-api-v2";
 import { env } from "./env.mjs";
-export const client = new TwitterApi({
+export const tclient = new TwitterApi({
   // these two values come from your app's API keys
 
-  appKey: env.appKey,
-  appSecret: env.appSecret,
+  appKey: "E8zRnxDtGL9jDALxVunpJZRDF",
+  appSecret: "RPfCryYCRgiLVKD7X96POcU3sslO01nNoSdx0qvzpYEpsO9lgG",
 
   // these two values come from the user's access tokens
-  accessToken: env.accessToken,
-  accessSecret: env.accessSecret,
-});
+  accessToken: "1651823398748577794-4UVkClc7w1qRFl3EfeiSrQKbiKXrGp",
+  accessSecret: "OzJlxRExpdHtuH3SbMK1M8Ww5XuQRxANDG0ZGUUEVDMfd",
 
+});
+export const client = tclient.readWrite
 export const generateTweet = () => {
   const arrayPrompts = [
     "fitness",
