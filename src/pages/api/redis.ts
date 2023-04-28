@@ -11,23 +11,20 @@ const redis = new Redis({
 });
 
 export default async (req: NextRequest, res: NextApiResponse) => {
-  if (req.method === "GET") {
-    const img_url = await redis.get("img_url");
+
+  if (req.method === "POST") {
+    const { img_url } = await req.json();
+    const img_url_res = await redis.set("img_url", img_url as string);
+
     const f = await fetch(img_url as unknown as string);
     const img = Buffer.from(await f.arrayBuffer());
     const id = await client.v1.uploadMedia(img, {
       mimeType: EUploadMimeType.Png,
     });
     const bufferId = await redis.set("bufferId", id);
-    // console.log(count);
     res.status(200).json(bufferId);
-    return new Response(`${bufferId}`);
-  }
-  if (req.method === "POST") {
-    const { img_url } = await req.json();
-    const img_url_res = await redis.set("img_url", img_url as string);
-
     return new Response(`${img_url_res}`);
+
   }
 };
 
