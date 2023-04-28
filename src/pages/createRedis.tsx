@@ -1,21 +1,41 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { redis } from "~/redis";
+import { toast } from "react-hot-toast";
+import { useRouter} from "next/router";
 const Home: NextPage = () => {
+  const router = useRouter()
+  async function getURL() {
+    const r = await redis.get<string>("img_url");
+    setR(r ?? "");
+  }
+  useEffect(() => {
+    getURL();
+  }, []);
+
   const [input, setInput] = useState<string>("");
+  const [r, setR] = useState<string>("");
   async function handle(event: FormEvent) {
     event.preventDefault();
     const data = {
       img_url: input,
     };
+    // console.log(JSON.stringify(data))
     const rs = await fetch("/api/redis", {
       method: "POST",
       body: JSON.stringify(data),
-    });
-    if (!rs.ok ) throw new Error("failed to post to redis")
+
+    }, );
+    if (rs.status !== 200) {
+      toast.error("failed to post to redis");
+      throw new Error("failed to post to redis");
+    }
     console.log(JSON.stringify(input));
+    toast.success("image url updated successfully");
     setInput("");
+    router.push("/createRedis")
   }
   return (
     <>
@@ -25,30 +45,36 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center ">
-        <div className="mb-5">
-          <label
-            htmlFor="image url"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            Image url
-          </label>
-          <div className="relative mt-2 flex space-x-3 rounded-md shadow-sm">
-            <form action="" onSubmit={handle} className="w-full">
-              <input
-                type="url"
-                required
-                name="input"
-                id="input"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                autoComplete="off"
-                className="block w-full rounded-md border-0 py-1.5 pl-7 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="http://img-url.com/"
-              />
-            </form>
-          </div>
+        <div className="flex w-full max-w-xl p-1">
+          <form action="" onSubmit={handle} className="w-full">
+            <input
+              type="text"
+              id="tweet"
+              required
+              value={input}
+              className="w-full flex-grow rounded-lg border-4 border-slate-400 bg-transparent p-4 text-xl outline-none "
+              placeholder="http://img-url.com/"
+              onChange={(e) => setInput(e.target.value)}
+              autoComplete="off"
+            />
+          </form>
         </div>
-        <Link href="/">Back to home </Link>
+        <div className="h-4" />
+        <div className="flex space-x-5 ">
+          <Link
+            className="text-blue-700 hover:text-blue-500 md:font-sans md:text-xl md:font-semibold "
+            href="/"
+          >
+            Back to home{" "}
+          </Link>
+          <Link
+            className="text-blue-700 hover:text-blue-500 md:font-sans md:text-xl md:font-semibold "
+            href={r}
+            target="_blank"
+          >
+            Link to image{" "}
+          </Link>
+        </div>
       </main>
     </>
   );
