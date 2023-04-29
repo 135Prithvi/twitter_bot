@@ -4,9 +4,9 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { redis } from "~/redis";
 import { toast } from "react-hot-toast";
-import { useRouter} from "next/router";
+import { useRouter } from "next/router";
 const Home: NextPage = () => {
-  const router = useRouter()
+  const router = useRouter();
   async function getURL() {
     const r = await redis.get<string>("img_url");
     setR(r ?? "");
@@ -16,18 +16,19 @@ const Home: NextPage = () => {
   }, []);
 
   const [input, setInput] = useState<string>("");
+  const [title, setTitle] = useState<string>("");
   const [r, setR] = useState<string>("");
   async function handle(event: FormEvent) {
     event.preventDefault();
     const data = {
       img_url: input,
+      title: title,
     };
     // console.log(JSON.stringify(data))
     const rs = await fetch("/api/redis", {
       method: "POST",
       body: JSON.stringify(data),
-
-    }, );
+    });
     if (rs.status !== 200) {
       toast.error("failed to post to redis");
       throw new Error("failed to post to redis");
@@ -35,7 +36,8 @@ const Home: NextPage = () => {
     console.log(JSON.stringify(input));
     toast.success("image url updated successfully");
     setInput("");
-    router.push("/createRedis")
+    setTitle("");
+    router.push("/createRedis");
   }
   return (
     <>
@@ -46,9 +48,9 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center ">
         <div className="flex w-full max-w-xl p-1">
-          <form action="" onSubmit={handle} className="w-full">
+          <form action="" onSubmit={handle} className="w-full space-y-2">
             <input
-              type="text"
+              type="url"
               id="tweet"
               required
               value={input}
@@ -57,6 +59,17 @@ const Home: NextPage = () => {
               onChange={(e) => setInput(e.target.value)}
               autoComplete="off"
             />
+            <input
+              type="text"
+              id="title"
+              required
+              value={title}
+              className="w-full flex-grow rounded-lg border-4 border-slate-400 bg-transparent p-4 text-xl outline-none "
+              placeholder="like ?"
+              onChange={(e) => setTitle(e.target.value)}
+              autoComplete="off"
+            />
+          <button type="submit" className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800">submit</button>
           </form>
         </div>
         <div className="h-4" />
