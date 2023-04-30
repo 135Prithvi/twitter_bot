@@ -4,12 +4,17 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { redis } from "~/redis";
 import { toast } from "react-hot-toast";
-import { useRouter } from "next/router";
+import Router from "next/router";
+interface Info {
+  img_url: string;
+  title: string;
+}
 const Home: NextPage = () => {
-  const router = useRouter();
+
   async function getURL() {
-    const r = await redis.get<string>("img_url");
-    setR(r ?? "");
+    const r = await redis.mget("img_url", "title");
+    // console.log("🎇🧨🎐🎃", r[0], r[1])
+    setR({ img_url: r[0] as string, title: r[1] as string });
   }
   useEffect(() => {
     getURL();
@@ -17,7 +22,7 @@ const Home: NextPage = () => {
 
   const [input, setInput] = useState<string>("");
   const [title, setTitle] = useState<string>("");
-  const [r, setR] = useState<string>("");
+  const [r, setR] = useState<Info>({ img_url: "", title: "" });
   async function handle(event: FormEvent) {
     event.preventDefault();
     const data = {
@@ -37,7 +42,7 @@ const Home: NextPage = () => {
     toast.success("image url updated successfully");
     setInput("");
     setTitle("");
-    router.push("/createRedis");
+    Router.reload();
   }
   return (
     <>
@@ -63,13 +68,19 @@ const Home: NextPage = () => {
               type="text"
               id="title"
               required
+              maxLength={30}
               value={title}
               className="w-full flex-grow rounded-lg border-4 border-slate-400 bg-transparent p-4 text-xl outline-none "
               placeholder="like ?"
               onChange={(e) => setTitle(e.target.value)}
               autoComplete="off"
             />
-          <button type="submit" className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800">submit</button>
+            <button
+              type="submit"
+              className="mb-2 mr-2 rounded-lg border border-gray-800 px-5 py-2.5 text-center text-sm font-medium text-gray-900 hover:bg-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
+            >
+              submit
+            </button>
           </form>
         </div>
         <div className="h-4" />
@@ -82,11 +93,14 @@ const Home: NextPage = () => {
           </Link>
           <Link
             className="text-blue-700 hover:text-blue-500 md:font-sans md:text-xl md:font-semibold "
-            href={r}
+            href={r.img_url}
             target="_blank"
           >
             Link to image{" "}
           </Link>
+          <a className="md:font-sans md:text-lg md:font-normal ">
+            {r.title}
+          </a>
         </div>
       </main>
     </>

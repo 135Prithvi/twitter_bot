@@ -6,10 +6,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const id = await redis.get("bufferId");
-  await client.v2.tweet(` React server component code`, {
+  const i = await redis.mget("bufferId" , "title");
+  await client.v2.tweet(`${i[1]}`, {
     media: {
-      media_ids: [id as string],
+      media_ids: [i[0] as string],
     },
   });
 

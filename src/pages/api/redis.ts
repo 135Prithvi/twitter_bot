@@ -27,7 +27,7 @@ export default async (req: NextRequest, res: NextApiResponse) => {
     });
     const bufferId = await redis.set("bufferId", id);
     res.status(200).json(img_url);
-    return new Response(`${img_url}`);
+    // return new Response(`${img_url}`);
   }
 };
 
